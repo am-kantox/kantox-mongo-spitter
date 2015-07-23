@@ -51,12 +51,12 @@ module Kantox
           bid_side_id: Integer,
           company: String,
           same_day: Integer,
-          company_created_at: DateTime,
+          company_created_at: Time,
           annual_fx: Integer,
           auto_vip: Integer,
           trade_limit: Integer,
           bought_sold: Integer,
-          execution_date: DateTime,
+          execution_date: Time,
           status: String
         }
       end
