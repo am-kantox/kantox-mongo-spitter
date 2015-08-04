@@ -15,7 +15,7 @@ module Kantox
       end
 
       def yo database = nil
-        MongoMapper.database = database || "kantox_mongo_#{Time.now.strftime('%Y%M%d_%H%M')}"
+        MongoMapper.database = database || "kantox_mongo_#{Time.now.strftime('%Y%m%d_%H%M')}"
         tables.map &:yo
       end
       module_function :tables, :yo

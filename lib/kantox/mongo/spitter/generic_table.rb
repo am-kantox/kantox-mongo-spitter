@@ -8,6 +8,7 @@ module Kantox
           TracePoint.new(:end) do |tp|
             if tp.self.name == "#{child}"
               tp.self.const_get('FIELDS').each do |name, type|
+                type = String if type == Time
                 tp.self.class_eval "key :#{name}, #{type}"
               end
 
@@ -15,8 +16,8 @@ module Kantox
                 def yo
                   ActiveRecord::Base.connection.execute(const_get('SQL')).map do |r|
                     new.tap do |tld|
-                      const_get('FIELDS').keys.each.with_index do |f, idx|
-                        tld.send "#{f}=", r[idx]
+                      const_get('FIELDS').each.with_index do |f, idx|
+                        tld.send "#{f.first}=", (f.last == Time) ? r[idx].strftime('%Y-%m-%dT%H:%M:%S.%3N%z') : r[idx]
                       end
                       tld.save
                     end
