@@ -14,6 +14,7 @@ module Kantox
 
               class << tp.self
                 def yo
+                  self.delete_all # clean up the collection
                   ActiveRecord::Base.connection.execute(const_get('SQL')).map do |r|
                     new.tap do |tld|
                       const_get('FIELDS').each.with_index do |f, idx|
