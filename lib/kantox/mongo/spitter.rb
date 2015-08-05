@@ -1,24 +1,45 @@
 require 'mongo_mapper'
 
 require 'kantox/mongo/spitter/version'
-require 'kantox/mongo/spitter/generic_table'
+require 'kantox/mongo/spitter/generic_spitter'
+require 'kantox/mongo/spitter/generic_sucker'
+
 require 'kantox/mongo/spitter/trade_limit_data'
 
 module Kantox
   module Mongo
     module Spitter
-      def tables
-        @tables ||= ObjectSpace.each_object(Class).inject([]) do |memo, k|
-          memo << k if k < GenericTable
-          memo
-        end
+      DB_NAME = "kantox_rm"
+
+      INSTANCES = {
+        spitters: [TradeLimitData],
+        suckers:  []
+      }
+
+      def instances lazy = false
+        lazy ?  INSTANCES :
+                @instances ||=
+                  ObjectSpace.each_object(Class).inject({spitters: [], suckers: []}) do |memo, k|
+                    if k < GenericSpitter
+                      memo[:spitters] << k
+                    elsif k < GenericSucker
+                      memo[:suckers] << k
+                    end
+                    memo
+                  end
       end
 
-      def yo database = nil
-        MongoMapper.database = database || "kantox_mongo_#{Time.now.strftime('%Y%m%d_%H%M')}"
-        tables.map &:yo
+      def spit database = nil
+        MongoMapper.database = (database || DB_NAME) % { datestamp: Time.now.strftime('%Y%m%d_%H%M') }
+        instances[:spitters].map &:yo
       end
-      module_function :tables, :yo
+
+      def suck database = nil
+        MongoMapper.database = (database || DB_NAME) % { datestamp: Time.now.strftime('%Y%m%d_%H%M') }
+        instances[:suckers].map &:yo
+      end
+
+      module_function :instances, :spit, :suck
     end
   end
 end

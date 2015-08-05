@@ -1,4 +1,4 @@
-require_relative 'generic_table'
+require_relative 'generic_spitter'
 
 module Kantox
   module Mongo
@@ -24,7 +24,7 @@ module Kantox
       # where ((`bids`.`workflow_state` = 'accepted') and
       #        (`hedges`.`workflow_state` = 'closed_to_trading') and
       #        (`profiles`.`group_id` = 3 or `profiles`.`group_id` = 8  or `profiles`.`group_id` = 9 ));
-      class TradeLimitData < GenericTable
+      class TradeLimitData < GenericSpitter
         SQL = %Q{ select `bid_sides`.`id` as `bid_side_id`,
             		 `profiles`.`id` as `company`,
             		 `profiles`.`same_day` as `same_day`,

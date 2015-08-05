@@ -1,12 +1,8 @@
 module Kantox
   module Mongo
     module Spitter
-      class GenericCollectionItem
+      class GenericSucker
         include MongoMapper::Document
-      end
-
-      class GenericReader
-#        MongoMapper.database = 
       end
     end
   end

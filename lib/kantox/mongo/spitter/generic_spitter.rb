@@ -1,7 +1,7 @@
 module Kantox
   module Mongo
     module Spitter
-      class GenericTable
+      class GenericSpitter
         include MongoMapper::Document
 
         def self.inherited child
