@@ -5,7 +5,7 @@ module Kantox
     module Spitter
       class TradeLimitResult < GenericSucker
         FIELDS = {
-          company: Integer
+          company: Integer,
           predicted_trade_limit: Float
         }
 
@@ -18,30 +18,31 @@ module Kantox
           map: {
             predicted_trade_limit: {
               field: :market_trade_limit_cents_prediction,
-              converter: ->(val){ (val * 100).to_i }
+              converter: ->(val){ val.to_i }
             }
           }
         }
 
         def self.yo
           TARGET[:map].map do |remote, local|
-            require 'pry'
-            binding.pry
             query = case_when_sql remote
             query = "UPDATE `#{TARGET[:table]}` SET `#{local[:field]}` = #{query}"
-            binding.pry
             ActiveRecord::Base.connection.execute query
-            binding.pry
           end
         end
 
         def self.case_when_sql field
           [
-            "CASE `#{TARGET[:id][:remote]}`",
+            "CASE `#{TARGET[:id][:local]}`",
             all.map do |row|
               id = row.public_send TARGET[:id][:remote]
               val = row.public_send field
-              val = TARGET[:map][field][:converter].call(val) if TARGET[:map][field][:converter]
+              # check if converter is Symbol => call it on val
+              val = case TARGET[:map][field][:converter]
+                    when String, Symbol then val.public_send TARGET[:map][field][:converter]
+                    when Proc then TARGET[:map][field][:converter].call(val)
+                    else val
+                    end
               val = "'#{val}'" unless val.is_a?(Numeric)  # Date??
               "\tWHEN '#{id}' THEN #{val}"
             end,
