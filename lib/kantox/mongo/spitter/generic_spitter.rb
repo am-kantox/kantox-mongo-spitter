@@ -2,9 +2,9 @@ module Kantox
   module Mongo
     module Spitter
       class GenericSpitter
-        include MongoMapper::Document
-
         def self.inherited child
+          child.send :include, MongoMapper::Document
+
           TracePoint.new(:end) do |tp|
             if tp.self.name == "#{child}"
               tp.self.const_get('FIELDS').each do |name, type|
@@ -20,8 +20,7 @@ module Kantox
                       const_get('FIELDS').each.with_index do |f, idx|
                         tld.send "#{f.first}=", (f.last == Time) ? r[idx].strftime('%Y-%m-%dT%H:%M:%S.%3N%z') : r[idx]
                       end
-                      tld.save
-                    end
+                    end.save
                   end
                 end
               end

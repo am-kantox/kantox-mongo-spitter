@@ -4,8 +4,10 @@ module Kantox
   module Mongo
     module Spitter
       class TradeLimitResult < GenericSucker
-        key :company, Integer
-        key :predicted_trade_limit, Float
+        FIELDS = {
+          company: Integer
+          predicted_trade_limit: Float
+        }
 
         TARGET = {
           table: :profiles,
