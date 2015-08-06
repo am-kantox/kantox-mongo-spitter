@@ -5,6 +5,7 @@ require 'kantox/mongo/spitter/generic_spitter'
 require 'kantox/mongo/spitter/generic_sucker'
 
 require 'kantox/mongo/spitter/trade_limit_data'
+require 'kantox/mongo/spitter/trade_limit_result'
 
 module Kantox
   module Mongo
@@ -13,7 +14,7 @@ module Kantox
 
       INSTANCES = {
         spitters: [TradeLimitData],
-        suckers:  []
+        suckers:  [TradeLimitResult]
       }
 
       def instances lazy = false

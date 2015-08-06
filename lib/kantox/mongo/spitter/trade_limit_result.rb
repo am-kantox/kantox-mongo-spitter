@@ -4,22 +4,32 @@ module Kantox
   module Mongo
     module Spitter
       class TradeLimitResult < GenericSucker
+        key :company, Integer
+        key :predicted_trade_limit, Float
+
         TARGET = {
           table: :profiles,
           id: {
             local: :id,
-            remote: :id
+            remote: :company
           },
           map: {
-            prediction: :trade_limit_prediction
+            predicted_trade_limit: {
+              field: :market_trade_limit_cents_prediction,
+              converter: ->(val){ (val * 100).to_i }
+            }
           }
         }
 
-        def yo
-          subsql = TARGET[:map].map do |remote, local|
-            sql = case_when_sql remote
-            sql = "UPDATE `#{TARGET[:table]}` SET `#{local}` = #{sql}"
-            ActiveRecord::Base.connection.execute sql
+        def self.yo
+          TARGET[:map].map do |remote, local|
+            require 'pry'
+            binding.pry
+            query = case_when_sql remote
+            query = "UPDATE `#{TARGET[:table]}` SET `#{local[:field]}` = #{query}"
+            binding.pry
+            ActiveRecord::Base.connection.execute query
+            binding.pry
           end
         end
 
@@ -29,9 +39,11 @@ module Kantox
             all.map do |row|
               id = row.public_send TARGET[:id][:remote]
               val = row.public_send field
-              "\tWHEN '#{id}' THEN '#{val}'"
+              val = TARGET[:map][field][:converter].call(val) if TARGET[:map][field][:converter]
+              val = "'#{val}'" unless val.is_a?(Numeric)  # Date??
+              "\tWHEN '#{id}' THEN #{val}"
             end,
-            "ELSE `#{TARGET[:map][field]}`",
+            "ELSE `#{TARGET[:map][field][:field]}`",
             'END'
           ].join $/
         end
